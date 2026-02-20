@@ -52,6 +52,11 @@ TYPE_PRIMITIVE_ANY(rsa_parse_private_key)
 TYPE_PRIMITIVE_ANY(rsa_parse_public_key)
 TYPE_PRIMITIVE_ANY(rsa_sign)
 TYPE_PRIMITIVE_ANY(rsa_verify)
+TYPE_PRIMITIVE_ANY(rsa_create_key_pair)
+TYPE_PRIMITIVE_ANY(rsa_export_private_key)
+TYPE_PRIMITIVE_ANY(rsa_export_public_key)
+TYPE_PRIMITIVE_ANY(rsa_encrypt)
+TYPE_PRIMITIVE_ANY(rsa_decrypt)
 
-}  // namespace toit::compiler
-}  // namespace toit
+} // namespace compiler
+} // namespace toit

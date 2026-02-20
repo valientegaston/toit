@@ -50,6 +50,11 @@ class RsaKey:
   /** Produces a 64-byte digest. */
   static SHA-512 ::= 512
 
+  /** Padding scheme PKCS#1 v1.5. */
+  static PADDING-PKCS1-V15 ::= 0
+  /** Padding scheme PKCS#1 v2.1 (OAEP). */
+  static PADDING-OAEP-V21  ::= 1
+
   rsa-key_ := ?
 
   constructor.private_ key/io.Data password/string?="":
@@ -132,6 +137,47 @@ class RsaKey:
     check-digest-length_ digest hash
     return rsa-verify_ rsa-key_ digest signature hash
 
+  /**
+  Generates a new RSA key pair.
+  The $bits must be one of 1024, 2048, 3072, or 4096.
+  The default is 2048.
+  */
+  static generate --bits/int=2048 -> RsaKey:
+    return RsaKey.generated_ (rsa-create-key-pair_ resource-freeing-module_ bits)
+
+  constructor.generated_ rsa-key:
+    rsa-key_ = rsa-key
+
+  /**
+  Exports the private key in PEM format.
+  */
+  private-key -> ByteArray:
+    return rsa-export-private-key_ rsa-key_
+
+  /**
+  Exports the public key in PEM format.
+  */
+  public-key -> ByteArray:
+    return rsa-export-public-key_ rsa-key_
+
+  /**
+  Encrypts the given $data using the public key.
+  The $padding must be either $PADDING-PKCS1-V15 or $PADDING-OAEP-V21.
+  Default is $PADDING-PKCS1-V15.
+  The $hash is used for OAEP padding and defaults to $SHA-256.
+  */
+  encrypt data/ByteArray --padding/int=PADDING-PKCS1-V15 --hash/int=SHA-256 -> ByteArray:
+    return rsa-encrypt_ rsa-key_ data padding hash
+
+  /**
+  Decrypts the given $data using the private key.
+  The $padding must be either $PADDING-PKCS1-V15 or $PADDING-OAEP-V21.
+  Default is $PADDING-PKCS1-V15.
+  The $hash is used for OAEP padding and defaults to $SHA-256.
+  */
+  decrypt data/ByteArray --padding/int=PADDING-PKCS1-V15 --hash/int=SHA-256 -> ByteArray:
+    return rsa-decrypt_ rsa-key_ data padding hash
+
   static check-digest-length_ digest/ByteArray hash/int:
     expected-length := 0
     if hash == SHA-256: expected-length = 32
@@ -164,4 +210,19 @@ rsa-sign_ rsa digest/io.Data hash/int -> ByteArray:
 
 rsa-verify_ rsa digest/ByteArray signature/ByteArray hash/int -> bool:
   #primitive.crypto.rsa-verify
+
+rsa-create-key-pair_ group bits/int -> any:
+  #primitive.crypto.rsa-create-key-pair
+
+rsa-export-private-key_ rsa -> ByteArray:
+  #primitive.crypto.rsa-export-private-key
+
+rsa-export-public-key_ rsa -> ByteArray:
+  #primitive.crypto.rsa-export-public-key
+
+rsa-encrypt_ rsa data padding/int hash/int -> ByteArray:
+  #primitive.crypto.rsa-encrypt
+
+rsa-decrypt_ rsa data padding/int hash/int -> ByteArray:
+  #primitive.crypto.rsa-decrypt
 
