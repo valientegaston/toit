@@ -56,9 +56,8 @@ MODULE_IMPLEMENTATION(crypto, MODULE_CRYPTO)
 
 PRIMITIVE(sha1_start) {
   ARGS(SimpleResourceGroup, group);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Sha1 *sha1 = _new Sha1(group);
   if (!sha1)
@@ -69,9 +68,8 @@ PRIMITIVE(sha1_start) {
 
 PRIMITIVE(sha1_clone) {
   ARGS(Sha1, parent);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Sha1 *child =
       _new Sha1(static_cast<SimpleResourceGroup *>(parent->resource_group()));
@@ -94,8 +92,7 @@ PRIMITIVE(sha1_add) {
 PRIMITIVE(sha1_get) {
   ARGS(Sha1, sha1);
   ByteArray *result = process->allocate_byte_array(20);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   uint8 hash[20];
   sha1->get_hash(hash);
   memcpy(ByteArray::Bytes(result).address(), hash, 20);
@@ -109,9 +106,8 @@ PRIMITIVE(blake2s_start) {
   ARGS(SimpleResourceGroup, group, Blob, key, word, output_length);
   if (key.length() > Blake2s::BLOCK_SIZE)
     FAIL(INVALID_ARGUMENT);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Blake2s *blake = _new Blake2s(group, key.length(), output_length);
   if (!blake)
@@ -132,9 +128,8 @@ PRIMITIVE(blake2s_start) {
 PRIMITIVE(blake2s_clone) {
 #ifdef CONFIG_TOIT_CRYPTO_EXTRA
   ARGS(Blake2s, parent);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Blake2s *child = _new Blake2s(
       static_cast<SimpleResourceGroup *>(parent->resource_group()), 0, 0);
@@ -167,8 +162,7 @@ PRIMITIVE(blake2s_get) {
   if (!(1 <= size && size <= Blake2s::MAX_HASH_SIZE))
     FAIL(INVALID_ARGUMENT);
   ByteArray *result = process->allocate_byte_array(size);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   uint8 hash[Blake2s::MAX_HASH_SIZE];
   blake->get_hash(hash);
   memcpy(ByteArray::Bytes(result).address(), hash, size);
@@ -184,9 +178,8 @@ PRIMITIVE(sha_start) {
   ARGS(SimpleResourceGroup, group, int, bits);
   if (bits != 224 && bits != 256 && bits != 384 && bits != 512)
     FAIL(INVALID_ARGUMENT);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Sha *sha = _new Sha(group, bits);
   if (!sha)
@@ -197,9 +190,8 @@ PRIMITIVE(sha_start) {
 
 PRIMITIVE(sha_clone) {
   ARGS(Sha, parent);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Sha *child = _new Sha(parent);
   if (!child)
@@ -221,8 +213,7 @@ PRIMITIVE(sha_add) {
 PRIMITIVE(sha_get) {
   ARGS(Sha, sha);
   ByteArray *result = process->allocate_byte_array(sha->hash_length());
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   ByteArray::Bytes bytes(result);
   sha->get(bytes.address());
   sha->resource_group()->unregister_resource(sha);
@@ -238,9 +229,8 @@ PRIMITIVE(siphash_start) {
     FAIL(INVALID_ARGUMENT);
   if (key.length() < 16)
     FAIL(INVALID_ARGUMENT);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Siphash *siphash =
       _new Siphash(group, key.address(), output_length, c_rounds, d_rounds);
@@ -256,9 +246,8 @@ PRIMITIVE(siphash_start) {
 PRIMITIVE(siphash_clone) {
 #ifdef CONFIG_TOIT_CRYPTO_EXTRA
   ARGS(Siphash, parent);
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   Siphash *child = _new Siphash(parent);
   if (!child)
@@ -287,8 +276,7 @@ PRIMITIVE(siphash_get) {
 #ifdef CONFIG_TOIT_CRYPTO_EXTRA
   ARGS(Siphash, siphash);
   ByteArray *result = process->allocate_byte_array(siphash->output_length());
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   siphash->get_hash(ByteArray::Bytes(result).address());
   siphash->resource_group()->unregister_resource(siphash);
   siphash_proxy->clear_external_address();
@@ -441,9 +429,8 @@ PRIMITIVE(aead_init) {
   if (key.length() != 16 && key.length() != 24 && key.length() != 32)
     FAIL(INVALID_ARGUMENT);
 
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   mbedtls_cipher_id_t mbedtls_cipher;
 
@@ -640,8 +627,7 @@ PRIMITIVE(aead_finish) {
   word rest = context->number_of_buffered_bytes();
   ByteArray *result =
       process->allocate_byte_array(rest + AeadContext::TAG_SIZE);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   ByteArray::Bytes result_bytes(result);
 
   uword rest_output = 0;
@@ -735,9 +721,8 @@ PRIMITIVE(aes_init) {
     FAIL(INVALID_ARGUMENT);
   }
 
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
   if (iv.length() == 0) {
     AesContext *aes = _new AesContext(group, &key, encrypt);
@@ -760,8 +745,7 @@ PRIMITIVE(aes_cbc_crypt) {
     FAIL(INVALID_ARGUMENT);
 
   ByteArray *result = process->allocate_byte_array(input.length());
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
 
   ByteArray::Bytes output_bytes(result);
 
@@ -779,8 +763,7 @@ PRIMITIVE(aes_ecb_crypt) {
     FAIL(INVALID_ARGUMENT);
 
   ByteArray *result = process->allocate_byte_array(input.length());
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  if (result == null) FAIL(ALLOCATION_FAILED);
 
   ByteArray::Bytes output_bytes(result);
 
@@ -828,24 +811,22 @@ public:
 
   ~RsaKey() { mbedtls_pk_free(&context_); }
 
-  mbedtls_pk_context *context() { return &context_; }
+  mbedtls_pk_context* context() { return &context_; }
 
 private:
   mbedtls_pk_context context_;
 };
 
-static Object *rsa_parse_key_helper(SimpleResourceGroup *group,
-                                    Process *process, Blob key, Blob password,
+static Object* rsa_parse_key_helper(SimpleResourceGroup* group,
+                                    Process* process, Blob key, Blob password,
                                     bool is_private) {
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
-  RsaKey *rsa = _new RsaKey(group);
-  if (!rsa)
-    FAIL(MALLOC_FAILED);
+  RsaKey* rsa = _new RsaKey(group);
+  if (!rsa) FAIL(MALLOC_FAILED);
 
-  char *key_copy = unvoid_cast<char *>(malloc(key.length() + 1));
+  char* key_copy = unvoid_cast<char *>(malloc(key.length() + 1));
   if (!key_copy) {
     delete rsa;
     FAIL(MALLOC_FAILED);
@@ -855,7 +836,7 @@ static Object *rsa_parse_key_helper(SimpleResourceGroup *group,
 
   int ret;
   if (is_private) {
-    const unsigned char *pwd =
+    const unsigned char* pwd =
         password.length() > 0 ? password.address() : NULL;
     size_t pwd_len = password.length();
     ret = mbedtls_pk_parse_key(
@@ -913,22 +894,18 @@ PRIMITIVE(rsa_sign) {
 
   mbedtls_md_type_t md_alg = get_md_alg(hash_algo_id);
 
-  if (md_alg == MBEDTLS_MD_NONE)
-    FAIL(INVALID_ARGUMENT);
+  if (md_alg == MBEDTLS_MD_NONE) FAIL(INVALID_ARGUMENT);
 
   uint8_t sig[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
   size_t actual_len = 0;
 
-  int ret =
-      mbedtls_pk_sign(rsa->context(), md_alg, digest.address(), digest.length(),
-                      sig, sizeof(sig), &actual_len, rsa_rng, NULL);
+  int ret = mbedtls_pk_sign(rsa->context(), md_alg, digest.address(), digest.length(),
+                            sig, sizeof(sig), &actual_len, rsa_rng, NULL);
 
-  if (ret != 0)
-    return tls_error(null, process, ret);
+  if (ret != 0) return tls_error(null, process, ret);
 
-  ByteArray *result = process->allocate_byte_array(actual_len);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* result = process->allocate_byte_array(actual_len);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   memcpy(ByteArray::Bytes(result).address(), sig, actual_len);
   return result;
 }
@@ -938,8 +915,7 @@ PRIMITIVE(rsa_verify) {
 
   mbedtls_md_type_t md_alg = get_md_alg(hash_algo_id);
 
-  if (md_alg == MBEDTLS_MD_NONE)
-    FAIL(INVALID_ARGUMENT);
+  if (md_alg == MBEDTLS_MD_NONE) FAIL(INVALID_ARGUMENT);
 
   int ret = mbedtls_pk_verify(rsa->context(), md_alg, digest.address(),
                               digest.length(), signature.address(),
@@ -951,16 +927,13 @@ PRIMITIVE(rsa_verify) {
 PRIMITIVE(rsa_create_key_pair) {
   ARGS(SimpleResourceGroup, group, int, bits);
 
-  if (bits != 1024 && bits != 2048 && bits != 3072 && bits != 4096)
-    FAIL(INVALID_ARGUMENT);
+  if (bits != 1024 && bits != 2048 && bits != 3072 && bits != 4096) FAIL(INVALID_ARGUMENT);
 
-  ByteArray *proxy = process->object_heap()->allocate_proxy();
-  if (proxy == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* proxy = process->object_heap()->allocate_proxy();
+  if (proxy == null) FAIL(ALLOCATION_FAILED);
 
-  RsaKey *rsa = _new RsaKey(group);
-  if (!rsa)
-    FAIL(MALLOC_FAILED);
+  RsaKey* rsa = _new RsaKey(group);
+  if (!rsa) FAIL(MALLOC_FAILED);
 
   int ret = mbedtls_pk_setup(rsa->context(),
                              mbedtls_pk_info_from_type(MBEDTLS_PK_RSA));
@@ -980,7 +953,7 @@ PRIMITIVE(rsa_create_key_pair) {
   return proxy;
 }
 
-static Object *rsa_export_key_helper(RsaKey *rsa, Process *process,
+static Object* rsa_export_key_helper(RsaKey* rsa, Process* process,
                                      bool is_private) {
   unsigned char buf[4096];
   int ret;
@@ -990,13 +963,11 @@ static Object *rsa_export_key_helper(RsaKey *rsa, Process *process,
     ret = mbedtls_pk_write_pubkey_pem(rsa->context(), buf, sizeof(buf));
   }
 
-  if (ret != 0)
-    return tls_error(null, process, ret);
+  if (ret != 0) return tls_error(null, process, ret);
 
   size_t len = strlen(reinterpret_cast<char *>(buf));
-  ByteArray *result = process->allocate_byte_array(len);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* result = process->allocate_byte_array(len);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   memcpy(ByteArray::Bytes(result).address(), buf, len);
   return result;
 }
@@ -1004,9 +975,8 @@ static Object *rsa_export_key_helper(RsaKey *rsa, Process *process,
 PRIMITIVE(rsa_encrypt) {
   ARGS(RsaKey, rsa, Blob, data, int, padding_mode, int, hash_id);
 
-  mbedtls_rsa_context *rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
-  int padding =
-      (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
+  mbedtls_rsa_context* rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
+  int padding = (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
   mbedtls_md_type_t hash = get_md_alg(hash_id);
 
   mbedtls_rsa_set_padding(rsa_ctx, padding, hash);
@@ -1014,16 +984,13 @@ PRIMITIVE(rsa_encrypt) {
   unsigned char output[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
   size_t output_len = 0;
 
-  int ret =
-      mbedtls_pk_encrypt(rsa->context(), data.address(), data.length(), output,
-                         &output_len, sizeof(output), rsa_rng, NULL);
+  int ret = mbedtls_pk_encrypt(rsa->context(), data.address(), data.length(), output,
+                               &output_len, sizeof(output), rsa_rng, NULL);
 
-  if (ret != 0)
-    return tls_error(null, process, ret);
+  if (ret != 0) return tls_error(null, process, ret);
 
-  ByteArray *result = process->allocate_byte_array(output_len);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* result = process->allocate_byte_array(output_len);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   memcpy(ByteArray::Bytes(result).address(), output, output_len);
   return result;
 }
@@ -1031,9 +998,8 @@ PRIMITIVE(rsa_encrypt) {
 PRIMITIVE(rsa_decrypt) {
   ARGS(RsaKey, rsa, Blob, data, int, padding_mode, int, hash_id);
 
-  mbedtls_rsa_context *rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
-  int padding =
-      (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
+  mbedtls_rsa_context* rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
+  int padding = (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
   mbedtls_md_type_t hash = get_md_alg(hash_id);
 
   mbedtls_rsa_set_padding(rsa_ctx, padding, hash);
@@ -1041,16 +1007,13 @@ PRIMITIVE(rsa_decrypt) {
   unsigned char output[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
   size_t output_len = 0;
 
-  int ret =
-      mbedtls_pk_decrypt(rsa->context(), data.address(), data.length(), output,
-                         &output_len, sizeof(output), rsa_rng, NULL);
+  int ret = mbedtls_pk_decrypt(rsa->context(), data.address(), data.length(), output,
+                               &output_len, sizeof(output), rsa_rng, NULL);
 
-  if (ret != 0)
-    return tls_error(null, process, ret);
+  if (ret != 0) return tls_error(null, process, ret);
 
-  ByteArray *result = process->allocate_byte_array(output_len);
-  if (result == null)
-    FAIL(ALLOCATION_FAILED);
+  ByteArray* result = process->allocate_byte_array(output_len);
+  if (result == null) FAIL(ALLOCATION_FAILED);
   memcpy(ByteArray::Bytes(result).address(), output, output_len);
   return result;
 }

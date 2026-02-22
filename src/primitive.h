@@ -795,7 +795,7 @@ namespace toit {
 // ----------------------------------------------------------------------------
 
 #define MODULE_IMPLEMENTATION_PRIMITIVE(name, arity)                           \
-  static Object *primitive_##name(Process *, Object **);
+  static Object* primitive_##name(Process*, Object**);
 #define MODULE_IMPLEMENTATION_ENTRY(name, arity)                               \
   {(void *)primitive_##name, arity},
 #define MODULE_IMPLEMENTATION(name, entries)                                   \
@@ -1408,40 +1408,39 @@ struct PrimitiveEntry {
 
 class Primitive {
 public:
-  typedef Object *Entry(Process *process, Object **arguments);
+  typedef Object* Entry(Process* process, Object** arguments);
 
   static void set_up();
 
   // Use temporary tagging for marking an error.
-  static bool is_error(Object *object) { return object->is_marked(); }
-  static HeapObject *mark_as_error(HeapObject *object) {
+  static bool is_error(Object* object) { return object->is_marked(); }
+  static HeapObject* mark_as_error(HeapObject* object) {
     return object->mark();
   }
-  static Object *unmark_from_error(Program *program, Object *object);
-  static Object *os_error(int error, Process *process,
+  static Object* unmark_from_error(Program* program, Object* object);
+  static Object* os_error(int error, Process* process,
                           const char *operation = null);
-  static Object *return_not_a_smi(Process *process, Object *value);
+  static Object* return_not_a_smi(Process* process, Object* value);
 
   // Module-specific primitive lookup. May return null if the primitive isn't
   // linked in.
-  static const PrimitiveEntry *at(unsigned module, unsigned index) {
-    const PrimitiveEntry *table = primitives_[module];
+  static const PrimitiveEntry* at(unsigned module, unsigned index) {
+    const PrimitiveEntry* table = primitives_[module];
     return (table == null) ? null : &table[index];
   }
 
   // Allocates or returns allocation failure.
-  static Object *allocate_double(double value, Process *process);
-  static Object *allocate_large_integer(int64 value, Process *process);
-  static Object *allocate_array(word length, Object *filler, Process *process);
+  static Object* allocate_double(double value, Process* process);
+  static Object* allocate_large_integer(int64 value, Process* process);
+  static Object* allocate_array(word length, Object* filler, Process* process);
 
-  static Object *integer(int64 value, Process *process) {
-    if (Smi::is_valid(value))
-      return Smi::from((word)value);
+  static Object* integer(int64 value, Process* process) {
+    if (Smi::is_valid(value)) return Smi::from((word) value);
     return allocate_large_integer(value, process);
   }
 
-private:
-  static const PrimitiveEntry *primitives_[];
+ private:
+  static const PrimitiveEntry* primitives_[];
 };
 
 } // namespace toit
