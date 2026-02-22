@@ -58,5 +58,5 @@ TYPE_PRIMITIVE_ANY(rsa_export_public_key)
 TYPE_PRIMITIVE_ANY(rsa_encrypt)
 TYPE_PRIMITIVE_ANY(rsa_decrypt)
 
-} // namespace compiler
-} // namespace toit
+}  // namespace toit::compiler
+}  // namespace toit
