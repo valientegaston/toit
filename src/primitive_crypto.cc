@@ -939,49 +939,57 @@ PRIMITIVE(rsa_export_public_key) {
   return rsa_export_key_helper(rsa, process, false);
 }
 
+// These values must stay in sync with the constants in lib/crypto/rsa.toit.
+static const int RSA_PADDING_PKCS1_V15 = 0;
+static const int RSA_PADDING_OAEP_V21  = 1;
+
 PRIMITIVE(rsa_encrypt) {
   ARGS(RsaKey, rsa, Blob, data, int, padding_mode, int, hash_id);
 
+  if (padding_mode != RSA_PADDING_PKCS1_V15 && padding_mode != RSA_PADDING_OAEP_V21) FAIL(INVALID_ARGUMENT);
+
   mbedtls_rsa_context* rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
-  int padding = (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
+  int padding = (padding_mode == RSA_PADDING_OAEP_V21) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
   mbedtls_md_type_t hash = get_md_alg(hash_id);
 
   mbedtls_rsa_set_padding(rsa_ctx, padding, hash);
 
-  unsigned char output[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
-  size_t output_len = 0;
+  size_t output_size = mbedtls_pk_get_len(rsa->context());
+  ByteArray* result = process->allocate_byte_array(output_size, /*force_external*/ true);
+  if (result == null) FAIL(ALLOCATION_FAILED);
 
+  size_t output_len = 0;
   int ret = mbedtls_pk_encrypt(rsa->context(), data.address(), data.length(),
-                               output, &output_len, sizeof(output), rsa_rng, NULL);
+                               ByteArray::Bytes(result).address(), &output_len, output_size, rsa_rng, NULL);
 
   if (ret != 0) return tls_error(null, process, ret);
 
-  ByteArray* result = process->allocate_byte_array(output_len);
-  if (result == null) FAIL(ALLOCATION_FAILED);
-  memcpy(ByteArray::Bytes(result).address(), output, output_len);
+  result->resize_external(process, output_len);
   return result;
 }
 
 PRIMITIVE(rsa_decrypt) {
   ARGS(RsaKey, rsa, Blob, data, int, padding_mode, int, hash_id);
 
+  if (padding_mode != RSA_PADDING_PKCS1_V15 && padding_mode != RSA_PADDING_OAEP_V21) FAIL(INVALID_ARGUMENT);
+
   mbedtls_rsa_context* rsa_ctx = mbedtls_pk_rsa(*(rsa->context()));
-  int padding = (padding_mode == 1) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
+  int padding = (padding_mode == RSA_PADDING_OAEP_V21) ? MBEDTLS_RSA_PKCS_V21 : MBEDTLS_RSA_PKCS_V15;
   mbedtls_md_type_t hash = get_md_alg(hash_id);
 
   mbedtls_rsa_set_padding(rsa_ctx, padding, hash);
 
-  unsigned char output[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
-  size_t output_len = 0;
+  size_t output_size = mbedtls_pk_get_len(rsa->context());
+  ByteArray* result = process->allocate_byte_array(output_size, /*force_external*/ true);
+  if (result == null) FAIL(ALLOCATION_FAILED);
 
+  size_t output_len = 0;
   int ret = mbedtls_pk_decrypt(rsa->context(), data.address(), data.length(),
-                               output, &output_len, sizeof(output), rsa_rng, NULL);
+                               ByteArray::Bytes(result).address(), &output_len, output_size, rsa_rng, NULL);
 
   if (ret != 0) return tls_error(null, process, ret);
 
-  ByteArray* result = process->allocate_byte_array(output_len);
-  if (result == null) FAIL(ALLOCATION_FAILED);
-  memcpy(ByteArray::Bytes(result).address(), output, output_len);
+  result->resize_external(process, output_len);
   return result;
 }
 }

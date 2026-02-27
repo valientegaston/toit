@@ -1,8 +1,8 @@
 // Copyright (C) 2026 Toit contributors.
 // Use of this source code is governed by an MIT-style license that can be
 // found in the lib/LICENSE file.
-
 import crypto.rsa
+import expect show *
 
 main:
   print "Generating RSA key pair (2048 bits)..."
@@ -21,24 +21,26 @@ main:
   print "Signature size: $signature.size"
 
   print "Verifying signature with original key..."
-  if key.verify message signature:
-    print "Verification successful!"
-  else:
-    throw "Verification failed!"
+  expect (key.verify message signature)
 
   print "Parsing exported public key..."
   pub-key := rsa.RsaKey.parse-public pub-pem
-  if pub-key.verify message signature:
-    print "Verification with parsed public key successful!"
-  else:
-    throw "Verification with parsed public key failed!"
+  expect (pub-key.verify message signature)
 
   print "Parsing exported private key..."
   priv-key := rsa.RsaKey.parse-private priv-pem
   signature2 := priv-key.sign message
-  if pub-key.verify message signature2:
-    print "Verification of new signature with parsed keys successful!"
-  else:
-    throw "Verification of new signature with parsed keys failed!"
+  expect (pub-key.verify message signature2)
+
+  print "Testing encryption/decryption..."
+  original-token := "MySecretToken123"
+  encrypted := pub-key.encrypt original-token.to-byte-array
+  decrypted := priv-key.decrypt encrypted
+  expect-equals original-token decrypted.to-string
+
+  print "Testing encryption/decryption (OAEP SHA256)..."
+  oaep-encrypted := pub-key.encrypt original-token.to-byte-array --padding=rsa.RsaKey.PADDING-OAEP-V21 --hash=rsa.RsaKey.SHA-256
+  oaep-decrypted := priv-key.decrypt oaep-encrypted --padding=rsa.RsaKey.PADDING-OAEP-V21 --hash=rsa.RsaKey.SHA-256
+  expect-equals original-token oaep-decrypted.to-string
 
   print "All tests passed!"

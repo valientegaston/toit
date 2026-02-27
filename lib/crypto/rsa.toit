@@ -143,6 +143,7 @@ class RsaKey:
   The default is 2048.
   */
   static generate --bits/int=2048 -> RsaKey:
+    if bits != 1024 and bits != 2048 and bits != 3072 and bits != 4096: throw "INVALID_ARGUMENT"
     return RsaKey.generated_ (rsa-create-key-pair_ resource-freeing-module_ bits)
 
   constructor.generated_ rsa-key:
